@@ -1,11 +1,17 @@
 package ca.ubc.cpsc310.gitlab.client;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import ca.ubc.cpsc310.gitlab.client.products.ProductItem;
 import ca.ubc.cpsc310.gitlab.client.user.IUser;
 import ca.ubc.cpsc310.gitlab.client.user.User;
+
+import java.util.List;
+
+import ca.ubc.cpsc310.gitlab.client.service.LoadUsersService;
+import ca.ubc.cpsc310.gitlab.client.service.LoadUsersServiceAsync;
+import ca.ubc.cpsc310.gitlab.client.user.IUser;
+
 import ca.ubc.cpsc310.gitlab.shared.FieldVerifier;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -25,7 +31,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
-
+//try to commit
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
@@ -38,12 +44,31 @@ public class GitLab implements EntryPoint {
 			+ "attempting to contact the server. Please check your network "
 			+ "connection and try again.";
 
+
 	private final FlexTable flexTable = new FlexTable();
+
+
+	final LoadUsersServiceAsync service = GWT.create(LoadUsersService.class);
+
 
 	/**
 	 * This is the entry point method.
 	 */
-	public void onModuleLoad() {
+	public void onModuleLoad() 
+	{
+		
+		service.getUsers(new AsyncCallback<List<IUser>>(){
+
+			@Override
+			public void onFailure(Throwable caught) {
+					Window.alert("Error occured " + caught.getClass() + " : " + caught.getMessage());
+				
+			}
+			@Override
+			public void onSuccess(List<IUser> result) { displayUsers(result);
+			}});
+
+		
 	
 
 		
@@ -55,7 +80,6 @@ public class GitLab implements EntryPoint {
 	 */
 	public void displayUsers(List<IUser> users)
 	{
-
 		RootPanel.get("root").add(flexTable);
 		
 		flexTable.setText(0,0, "Name");
@@ -66,10 +90,8 @@ public class GitLab implements EntryPoint {
 		flexTable.setStyleName("centered-table", true);
 		
 		for(int i=0; i < users.size(); i++)
-		{
-		
-			IUser user = users.get(i);
-			
+		{		
+			IUser user = users.get(i);		
 			flexTable.setText(i+1,0,user.getName());
 			if(user.getLanguage().trim().equals("EN"))
 			{
@@ -86,5 +108,6 @@ public class GitLab implements EntryPoint {
 			
 			flexTable.setText(i+1,3,String.valueOf(user.getWishList().size()));
 		}
+
 	}
 }
